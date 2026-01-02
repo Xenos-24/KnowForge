@@ -1,5 +1,7 @@
 import { Resource } from '../types/resource';
 import { ResourceCard } from './ResourceCard';
+import { motion, AnimatePresence } from 'framer-motion';
+import { EmptyState } from './EmptyState';
 
 interface ResourceListProps {
     resources: Resource[];
@@ -9,29 +11,32 @@ interface ResourceListProps {
 
 export const ResourceList = ({ resources, onEdit, onDelete }: ResourceListProps) => {
     if (resources.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="bg-gray-100 dark:bg-zinc-800 p-4 rounded-full mb-4">
-                    <span className="text-4xl">📭</span>
-                </div>
-                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No resources found</h3>
-                <p className="text-gray-500 dark:text-gray-400 max-w-sm">
-                    Get started by adding your first resource to the library.
-                </p>
-            </div>
-        );
+        return <EmptyState />;
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {resources.map((resource) => (
-                <ResourceCard
-                    key={resource.id}
-                    resource={resource}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                />
-            ))}
-        </div>
+        <motion.div
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20"
+        >
+            <AnimatePresence mode="popLayout">
+                {resources.map((resource) => (
+                    <motion.div
+                        key={resource.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <ResourceCard
+                            resource={resource}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                        />
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+        </motion.div>
     );
 };
