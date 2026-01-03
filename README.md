@@ -45,7 +45,7 @@ src/
 
 ---
 
-## 🎨 UX & Design System
+## UX & Design System
 
 KnowForge implements a **Glassmorphism** design language to create a sense of depth and hierarchy.
 *   **Visual Hierarchy**: Semi-transparent layers (`backdrop-blur-xl`) and subtle border gradients are used to distinguish content without overwhelming the user.
@@ -54,7 +54,7 @@ KnowForge implements a **Glassmorphism** design language to create a sense of de
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology | Why? |
 | :--- | :--- | :--- |
@@ -70,7 +70,7 @@ KnowForge implements a **Glassmorphism** design language to create a sense of de
 
 ---
 
-## � Getting Started
+## Getting Started
 
 ### Prerequisites
 *   Node.js (v18+)
@@ -101,7 +101,7 @@ KnowForge implements a **Glassmorphism** design language to create a sense of de
 
 ---
 
-## 🔮 Roadmap & Scalability
+## Roadmap & Scalability
 
 As we look toward V2, the architecture is primed for the following enhancements:
 
