@@ -1,54 +1,65 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Resource, ResourceFormData } from '../types/resource';
-import { ResourceStorage } from '../services/storage';
+import { ResourceService } from '../services/resourceService';
 
 export const useResources = () => {
     const [resources, setResources] = useState<Resource[]>([]);
+    const [folders, setFolders] = useState<{ id: string, name: string, color: string }[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const loadResources = useCallback(() => {
-        setResources(ResourceStorage.getResources());
-    }, []);
+    const refresh = async () => {
+        setIsLoading(true);
+        try {
+            const [resData, folderData] = await Promise.all([
+                ResourceService.getResources(),
+                ResourceService.getFolders()
+            ]);
+            setResources(resData);
+            setFolders(folderData);
+        } catch (error) {
+            console.error("Failed to refresh data", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        loadResources();
+        refresh();
+    }, []);
 
-        // Optional: Listen to storage events for cross-tab sync
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'appcrafters_resources') {
-                loadResources();
-            }
-        };
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
+    const addResource = async (data: ResourceFormData) => {
+        await ResourceService.addResource(data);
+        refresh();
+    };
 
-    }, [loadResources]);
+    const updateResource = async (id: string, data: Partial<Resource>) => {
+        await ResourceService.updateResource(id, data);
+        refresh();
+    };
 
-    const addResource = useCallback((data: ResourceFormData) => {
-        try {
-            const newResource = ResourceStorage.addResource(data);
-            loadResources();
-            return newResource;
-        } catch (error) {
-            console.error("Error adding resource", error);
-            throw error;
-        }
-    }, [loadResources]);
+    const deleteResource = async (id: string) => {
+        await ResourceService.deleteResource(id);
+        refresh();
+    };
 
-    const updateResource = useCallback((id: string, data: Partial<ResourceFormData>) => {
-        ResourceStorage.updateResource(id, data);
-        loadResources();
-    }, [loadResources]);
+    const createFolder = async (name: string, color: string) => {
+        await ResourceService.createFolder(name, color);
+        refresh();
+    };
 
-    const deleteResource = useCallback((id: string) => {
-        ResourceStorage.deleteResource(id);
-        loadResources();
-    }, [loadResources]);
+    const deleteFolder = async (id: string) => {
+        await ResourceService.deleteFolder(id);
+        refresh();
+    };
 
     return {
         resources,
+        folders,
         addResource,
         updateResource,
         deleteResource,
-        refreshResources: loadResources
+        createFolder,
+        deleteFolder,
+        isLoading
     };
 };

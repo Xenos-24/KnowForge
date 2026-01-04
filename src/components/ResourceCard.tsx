@@ -1,68 +1,171 @@
 import { Resource } from '../types/resource';
-import { Video, FileText, BookOpen, Trash2, Edit, ExternalLink } from 'lucide-react';
-import { Button } from './ui/Button';
+import { Trash2, Edit, ExternalLink, Play, File, Link as LinkIcon, FileSpreadsheet, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useDraggable } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
 
 interface ResourceCardProps {
     resource: Resource;
-    onEdit: (resource: Resource) => void;
-    onDelete: (id: string) => void;
+    onEdit?: (resource: Resource) => void;
+    onDelete?: (id: string) => void;
 }
 
 export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) => {
+    // DnD Logic
+    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+        id: resource.id,
+        data: { type: 'resource', resource }
+    });
 
-    const typeConfig = {
-        Video: { color: 'text-red-500 bg-red-100 dark:bg-red-500/20', icon: Video, label: 'Video' },
-        Article: { color: 'text-blue-500 bg-blue-100 dark:bg-blue-500/20', icon: FileText, label: 'Article' },
-        Tutorial: { color: 'text-green-500 bg-green-100 dark:bg-green-500/20', icon: BookOpen, label: 'Tutorial' }
+    const style = transform ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: isDragging ? 50 : 1,
+        opacity: isDragging ? 0.8 : 1
+    } : undefined;
+
+    // Helper for Styles
+    const getResourceStyle = (r: Resource) => {
+        const title = r.title.toLowerCase();
+        const type = r.type;
+
+        // 1. EXCEL / SHEETS
+        if (title.endsWith('.xlsx') || title.endsWith('.xls') || title.endsWith('.csv') || type === 'sheet') {
+            return {
+                headerBg: "bg-[#BEF264]", // Neon Lime (Solid)
+                iconColor: "text-black", // Contrast for light lime
+                markerColor: "bg-[#BEF264]",
+                icon: <FileSpreadsheet className="text-black/80 w-12 h-12" />,
+                badge: "SHEET"
+            };
+        }
+
+        // 2. WORD / DOCS
+        if (title.endsWith('.docx') || title.endsWith('.doc') || type === 'doc') {
+            return {
+                headerBg: "bg-[#3B82F6]", // Bright Blue (Solid)
+                iconColor: "text-white",
+                markerColor: "bg-[#3B82F6]",
+                icon: <FileText className="text-white w-12 h-12" />,
+                badge: "DOC"
+            };
+        }
+
+        // 3. PDF
+        if (title.endsWith('.pdf') || type === 'pdf') {
+            return {
+                headerBg: "bg-[#EF4444]", // Vibrant Red (Solid)
+                iconColor: "text-white",
+                markerColor: "bg-[#EF4444]",
+                icon: <File className="text-white w-12 h-12" />,
+                badge: "PDF"
+            };
+        }
+
+        // 4. Video
+        if (type === 'video') {
+            return {
+                headerBg: 'bg-[#A855F7]', // Lavender/Purple (Solid)
+                iconColor: 'text-white',
+                markerColor: 'bg-[#A855F7]',
+                icon: <Play className="text-white w-12 h-12" />,
+                badge: 'VIDEO'
+            };
+        }
+
+        // 5. Default / Link
+        return {
+            headerBg: 'bg-[#64748B]', // Slate (Solid)
+            iconColor: 'text-white',
+            markerColor: 'bg-[#64748B]',
+            icon: <LinkIcon className="text-white w-12 h-12" />,
+            badge: 'LINK'
+        };
     };
 
-    const { color, icon: Icon, label } = typeConfig[resource.type];
-
-    // Format date
-    const date = new Date(resource.createdAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-    });
+    const config = getResourceStyle(resource);
+    const date = new Date(resource.created_at).toLocaleDateString();
 
     return (
         <motion.div
-            layout
-            className="group relative bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-100/50 dark:hover:border-zinc-700 hover:-translate-y-1 flex flex-col h-full"
+            ref={setNodeRef}
+            style={style}
+            {...listeners}
+            {...attributes}
+            // "Juice" Interaction
+            whileHover={{ y: -8, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="h-full touch-none group relative"
         >
-            <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-2">
-                    <span className={cn('flex items-center justify-center w-8 h-8 rounded-full', color)}>
-                        <Icon size={14} />
-                    </span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{label}</span>
+            <div className="flex flex-col h-full bg-[#1E1E2E] rounded-xl overflow-hidden shadow-lg hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.5)] transition-shadow duration-300 border border-[#ffffff0f]">
+
+                {/* Visual Header (Solid Color) */}
+                <div className={cn("relative h-40 w-full shrink-0 flex items-center justify-center overflow-hidden", config.headerBg)}>
+                    {/* No Noise - Clean Solid Color */}
+
+                    {resource.thumbnail_url ? (
+                        <div className="absolute inset-0 z-10">
+                            <img src={resource.thumbnail_url} alt="" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                            {resource.type === 'video' && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
+                                    <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
+                                        <Play size={20} className="text-white ml-1 fill-white" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="relative z-10">
+                            {config.icon}
+                        </div>
+                    )}
+
+                    {/* Badge */}
+                    <div className="absolute top-4 left-4 z-20">
+                        <span className="px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase bg-black/40 text-white/90 backdrop-blur-md border border-white/10">
+                            {config.badge}
+                        </span>
+                    </div>
                 </div>
 
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" onClick={() => onEdit(resource)}>
-                        <Edit size={14} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => onDelete(resource.id)}>
-                        <Trash2 size={14} />
-                    </Button>
+                {/* Content Body */}
+                <div className="p-5 flex flex-col flex-1 relative">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-bold text-[rgba(237,237,237,0.4)] uppercase tracking-widest">{resource.folder}</span>
+                        <span className="text-[10px] font-medium text-[rgba(237,237,237,0.4)]">{date}</span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-[#EDEDED] leading-snug mb-2 line-clamp-2 group-hover:text-white transition-colors cursor-pointer" onClick={() => onEdit(resource)}>
+                        {resource.title}
+                    </h3>
+
+                    <p className="text-xs text-[rgba(237,237,237,0.6)] line-clamp-3 mb-4 leading-relaxed font-normal">
+                        {resource.description}
+                    </p>
+
+                    <div className="mt-auto pt-4 border-t border-[#ffffff0f] flex items-center justify-between">
+                        <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()}>
+                            <button onClick={() => onEdit(resource)} className="text-[rgba(237,237,237,0.4)] hover:text-white transition-colors p-1 hover:bg-white/5 rounded">
+                                <Edit size={14} />
+                            </button>
+                            <button onClick={() => onDelete(resource.id)} className="text-[rgba(237,237,237,0.4)] hover:text-red-400 transition-colors p-1 hover:bg-white/5 rounded">
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
+                        <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[rgba(237,237,237,0.6)] hover:text-white flex items-center gap-1 transition-colors" onMouseDown={(e) => e.stopPropagation()}>
+                            OPEN <ExternalLink size={12} />
+                        </a>
+                    </div>
                 </div>
-            </div>
 
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 line-clamp-2 leading-tight group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors" title={resource.title}>
-                {resource.title}
-            </h3>
-
-            <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-grow line-clamp-3 leading-relaxed">
-                {resource.description}
-            </p>
-
-            <div className="mt-auto pt-4 border-t border-slate-50 dark:border-zinc-800 flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400 dark:text-zinc-500">{date}</span>
-
-                <a href={resource.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline">
-                    Visit <ExternalLink size={14} />
-                </a>
+                {/* The "Marker Line" Animation (Crucial) */}
+                <div className="absolute bottom-0 left-0 w-full flex justify-center pb-[1px]">
+                    <motion.div
+                        initial={{ width: "0%", opacity: 0 }}
+                        whileHover={{ width: "80%", opacity: 1 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className={cn("h-[3px] rounded-full shadow-[0_0_10px_currentColor]", config.markerColor)}
+                    />
+                </div>
             </div>
         </motion.div>
     );

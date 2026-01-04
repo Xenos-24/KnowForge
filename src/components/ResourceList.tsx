@@ -1,42 +1,49 @@
-import { Resource } from '../types/resource';
-import { ResourceCard } from './ResourceCard';
-import { motion, AnimatePresence } from 'framer-motion';
-import { EmptyState } from './EmptyState';
+import { useEffect, useState } from "react";
+import { ResourceCard } from "./ResourceCard";
+import { supabase } from "../lib/supabase";
 
-interface ResourceListProps {
-    resources: Resource[];
-    onEdit: (resource: Resource) => void;
-    onDelete: (id: string) => void;
-}
+export function ResourceList({ activeFolderId, activeType }: { activeFolderId: string | null; activeType?: string }) {
+    const [resources, setResources] = useState<any[]>([]);
 
-export const ResourceList = ({ resources, onEdit, onDelete }: ResourceListProps) => {
-    if (resources.length === 0) {
-        return <EmptyState />;
+    useEffect(() => {
+        fetchResources();
+    }, [activeFolderId, activeType]);
+
+    async function fetchResources() {
+        let query = supabase.from('resources').select('*');
+
+        // 1. Folder Filters
+        if (activeFolderId) {
+            query = query.eq('folder_id', activeFolderId);
+        }
+
+        // 2. Type Filters (Intersection)
+        if (activeType && activeType !== 'all') {
+            if (activeType === 'video') {
+                query = query.eq('type', 'video');
+            } else if (activeType === 'link') {
+                query = query.in('type', ['link', 'url', 'article', 'website']);
+            } else if (activeType === 'doc') {
+                query = query.in('type', ['pdf', 'doc', 'docx', 'sheet', 'slide']);
+            }
+        }
+
+        const { data, error } = await query;
+        if (!error && data) setResources(data);
     }
 
     return (
-        <motion.div
-            layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20"
-        >
-            <AnimatePresence mode="popLayout">
-                {resources.map((resource) => (
-                    <motion.div
-                        key={resource.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        <ResourceCard
-                            resource={resource}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                        />
-                    </motion.div>
+        <div className="w-full p-8 pb-32">
+            <div className="mb-8">
+                <h2 className="text-3xl font-bold text-white">Library</h2>
+                <p className="text-slate-500 mt-1">{resources.length} resources found</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 w-full">
+                {resources.map((res) => (
+                    <ResourceCard key={res.id} resource={res} />
                 ))}
-            </AnimatePresence>
-        </motion.div>
+            </div>
+        </div>
     );
-};
+}
