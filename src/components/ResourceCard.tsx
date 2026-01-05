@@ -1,5 +1,5 @@
 import { Resource } from '../types/resource';
-import { Trash2, Edit, ExternalLink, Play, File, Link as LinkIcon, FileSpreadsheet, FileText } from 'lucide-react';
+import { Trash2, Edit, ExternalLink, Play, File, Link as LinkIcon, FileSpreadsheet, FileText, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useDraggable } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
@@ -8,9 +8,11 @@ interface ResourceCardProps {
     resource: Resource;
     onEdit?: (resource: Resource) => void;
     onDelete?: (id: string) => void;
+    onToggleImportant?: (id: string, isImportant: boolean) => void;
+    folders?: { id: string, name: string, color: string }[];
 }
 
-export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) => {
+export const ResourceCard = ({ resource, onEdit, onDelete, onToggleImportant, folders = [] }: ResourceCardProps) => {
     // DnD Logic
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: resource.id,
@@ -94,7 +96,7 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
             // Keep DnD interaction but remove "Juice"
             className="h-full touch-none group relative pointer-events-auto"
         >
-            <div className="flex flex-col h-full bg-surface-1 rounded-2xl overflow-hidden shadow-lg hover:bg-surface-2 hover:border-purple-500/20 hover:shadow-[0_8px_32px_-8px_rgba(139,92,246,0.15)] hover:-translate-y-1 transition-all duration-300 border border-subtle">
+            <div className="flex flex-col h-full bg-surface-1 rounded-2xl overflow-hidden shadow-lg hover:bg-surface-2 hover:border-accent/20 hover:shadow-[0_8px_32px_-8px_rgba(160,137,104,0.15)] hover:-translate-y-1 transition-all duration-300 border border-subtle">
 
                 {/* Visual Header (Solid Color) */}
                 <div className={cn("relative h-40 w-full shrink-0 flex items-center justify-center overflow-hidden", config.headerBg)}>
@@ -117,44 +119,59 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
                         </div>
                     )}
 
-                    {/* Badge */}
+                    {/* Badge - Colored */}
                     <div className="absolute top-4 left-4 z-20">
-                        <span className="px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase bg-black/40 text-white/90 backdrop-blur-md border border-white/10">
+                        <span className={cn("px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase text-white backdrop-blur-md border border-white/10", config.markerColor)}>
                             {config.badge}
                         </span>
                     </div>
+
+                    {/* Star Toggle - Top Right */}
+                    <button
+                        onClick={(e) => {
+                            console.log('Star button clicked!', resource.id, resource.is_important);
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (onToggleImportant) {
+                                console.log('Calling onToggleImportant');
+                                onToggleImportant(resource.id, !resource.is_important);
+                            } else {
+                                console.log('onToggleImportant is undefined!');
+                            }
+                        }}
+                        className="absolute top-4 right-4 z-20 p-1.5 rounded-lg bg-black/20 hover:bg-black/40 backdrop-blur-md border border-white/10 transition-all cursor-pointer"
+                        onMouseDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }}
+                        onPointerDown={(e) => {
+                            e.stopPropagation();
+                        }}
+                    >
+                        <Star
+                            size={16}
+                            className={resource.is_important ? "text-yellow-400 fill-yellow-400" : "text-white/60"}
+                        />
+                    </button>
                 </div>
 
                 {/* Content Body */}
                 <div className="p-6 flex flex-col flex-1 relative border-t border-subtle">
-                    {/* Pills: Folder, Type, Important */}
+                    {/* Pills: Only Folder */}
                     <div className="flex flex-wrap items-center gap-2 mb-3">
-                        {/* Folder Pill */}
-                        {resource.folder && (
-                            <span className="pill-folder px-2 py-0.5 rounded-full text-xs font-medium">
-                                {resource.folder}
-                            </span>
-                        )}
-
-                        {/* Type Pill */}
-                        {resource.type && (
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${resource.type === 'video' ? 'pill-video' :
-                                resource.type === 'pdf' || resource.type === 'doc' ? 'pill-doc' :
-                                    'pill-link'
-                                }`}>
-                                {resource.type === 'video' ? '📹 Video' :
-                                    resource.type === 'pdf' ? '📄 PDF' :
-                                        resource.type === 'doc' ? '📝 Doc' :
-                                            '🔗 Link'}
-                            </span>
-                        )}
-
-                        {/* Important Star */}
-                        {resource.is_important && (
-                            <span className="pill-important px-2 py-0.5 rounded-full text-xs font-medium">
-                                ⭐ Important
-                            </span>
-                        )}
+                        {/* Folder Pill with Color */}
+                        {resource.folder && (() => {
+                            const folder = folders.find(f => f.name === resource.folder);
+                            const folderColor = folder?.color || '#e5d4c1'; // Default tan
+                            return (
+                                <span
+                                    className="px-2 py-0.5 rounded-full text-xs font-medium text-primary"
+                                    style={{ backgroundColor: folderColor }}
+                                >
+                                    {resource.folder}
+                                </span>
+                            );
+                        })()}
 
                         <span className="text-xs font-medium text-tertiary ml-auto">{date}</span>
                     </div>
@@ -190,7 +207,7 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
                                 <Trash2 size={14} />
                             </button>
                         </div>
-                        <a href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors" onMouseDown={(e) => e.stopPropagation()}>
+                        <a href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-hover transition-colors" onMouseDown={(e) => e.stopPropagation()}>
                             Open <ExternalLink size={14} />
                         </a>
                     </div>

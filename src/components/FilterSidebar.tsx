@@ -10,18 +10,21 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-export function FilterSidebar({
-    activeFolderId,
-    setActiveFolderId,
-    activeType,
-    setActiveType,
-    onOpenModal,
-    onCreateFolder,
-    folders,
-    onDeleteFolder,
-    resources = []
-}: any) {
+export function FilterSidebar({ activeFolderId, setActiveFolderId, activeType, setActiveType, folders, onDeleteFolder, onCreateFolder, resources, onOpenModal }: any) {
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+    const [selectedColor, setSelectedColor] = useState('#f4a5a5'); // Default to soft pink
+
+    // Pastel color palette
+    const folderColors = [
+        { color: '#f4a5a5', name: 'Soft Pink' },
+        { color: '#f5d3a9', name: 'Peach' },
+        { color: '#f9e5a9', name: 'Light Yellow' },
+        { color: '#c4e5c4', name: 'Mint Green' },
+        { color: '#b8d8e8', name: 'Sky Blue' },
+        { color: '#d9c4e8', name: 'Lavender' },
+        { color: '#f4c8d8', name: 'Rose' },
+        { color: '#e5d4c1', name: 'Tan' },
+    ];
 
     // Helper to count by group
     const countByType = (types: string[]) =>
@@ -45,9 +48,10 @@ export function FilterSidebar({
         if (e.key === 'Enter') {
             const name = e.currentTarget.value.trim();
             if (name) {
-                onCreateFolder(name);
+                onCreateFolder(name, selectedColor); // Pass selected color
+                setIsCreatingFolder(false);
+                setSelectedColor('#f4a5a5'); // Reset to default
             }
-            setIsCreatingFolder(false);
         } else if (e.key === 'Escape') {
             setIsCreatingFolder(false);
         }
@@ -75,10 +79,10 @@ export function FilterSidebar({
                     <button
                         onClick={() => { setActiveFolderId(null); setActiveType('all'); }}
                         className={`
-                            relative z-10 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 border border-white/5 active:scale-95
+                            relative z-10 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 border border-subtle active:scale-95
                             ${activeFolderId === null && activeType === 'all'
-                                ? "text-white ring-1 ring-white/10"
-                                : "text-gray-400 hover:text-white hover:bg-white/5"}
+                                ? "text-primary ring-1 ring-moderate"
+                                : "text-secondary hover:text-primary hover:bg-surface-1"}
                         `}
                     >
                         {activeFolderId === null && activeType === 'all' && (
@@ -151,7 +155,7 @@ export function FilterSidebar({
                 <div className="space-y-0.5">
                     {/* Inline Creation Input */}
                     {isCreatingFolder && (
-                        <div className="px-4 py-2">
+                        <div className="px-4 py-2 space-y-2">
                             <input
                                 autoFocus
                                 type="text"
@@ -160,6 +164,24 @@ export function FilterSidebar({
                                 onBlur={() => setIsCreatingFolder(false)}
                                 onKeyDown={handleCreateFolderKeyUp}
                             />
+                            {/* Color Picker */}
+                            <div className="flex flex-wrap gap-1.5">
+                                {folderColors.map((item) => (
+                                    <button
+                                        key={item.color}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setSelectedColor(item.color);
+                                        }}
+                                        onMouseDown={(e) => e.preventDefault()} // Prevent blur
+                                        className={`w-6 h-6 rounded-full transition-all ${selectedColor === item.color ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-0 scale-110' : 'hover:scale-105'}`}
+                                        style={{ backgroundColor: item.color }}
+                                        title={item.name}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -184,13 +206,15 @@ export function FilterSidebar({
                                             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                         />
                                     )}
-                                    <Hash
-                                        size={14}
-                                        className={`
-                                            relative z-10 transition-colors 
-                                            ${isActive ? "text-accent" : "text-tertiary group-hover:text-secondary"}
-                                        `}
+                                    {isActive && (
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-accent rounded-full" />
+                                    )}
+                                    {/* Colored Dot */}
+                                    <div
+                                        className="w-2 h-2 rounded-full flex-shrink-0 relative z-10"
+                                        style={{ backgroundColor: folder.color }}
                                     />
+                                    <Hash size={14} className={`relative z-10 ${isActive ? "text-accent" : "text-tertiary group-hover:text-secondary"}`} />
                                     <span className="relative z-10 truncate">{folder.name}</span>
                                 </button>
 

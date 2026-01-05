@@ -27,7 +27,7 @@ export function KnowledgeGraph() {
     }, []);
 
     return (
-        <div className="w-full h-full relative bg-[#111118] rounded-3xl overflow-hidden shadow-2xl border border-white/5">
+        <div className="w-full h-full relative bg-surface-0 rounded-3xl overflow-hidden shadow-2xl border border-subtle">
             {data.nodes.length === 0 && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-10 pointer-events-none">
                     <p className="font-bold text-lg mb-1">No connections yet</p>
@@ -38,22 +38,20 @@ export function KnowledgeGraph() {
                 width={dimensions.w}
                 height={dimensions.h}
                 graphData={data}
-                backgroundColor="#111118" // <--- DARK BG FIXED
+                backgroundColor="#fefdfb" // Cream background
                 nodeRelSize={6}
-                linkColor={() => "#475569"}
+                linkColor={() => "#dddcd7"} // Subtle brown links
                 nodeCanvasObject={(node: any, ctx, globalScale) => {
-                    // 1. Color Logic
-                    let color = "#A855F7"; // Default Purple (Video)
+                    // 1. Color Logic - Use cream tones
+                    let color = "#a08968"; // Default Brown
                     const t = (node.type || "").toLowerCase();
                     const n = (node.title || "").toLowerCase();
 
-                    if (n.includes('.xlsx') || t === 'sheet') color = "#BEF264"; // Lime
-                    if (n.includes('.docx') || t === 'doc') color = "#3B82F6";   // Blue
-                    if (n.includes('.pdf') || t === 'pdf') color = "#EF4444";    // Red
-
-                    // 2. Draw Node
-                    ctx.beginPath();
-                    ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI, false);
+                    if (n.includes('.xlsx') || t === 'sheet') color = "#8b7355"; // Cream
+                    if (n.includes('.pdf') || t === 'pdf') color = "#9b8b7e"; // Beige
+                    if (n.includes('.docx') || t === 'doc') color = "#a08968"; // Sand
+                    if (t === 'video') color = "#8b7355"; // Taupe
+                    if (["link", "url", "article", "website"].includes(t)) color = "#9b8b7e"; // Neutralh.PI, false);
                     ctx.fillStyle = color;
                     ctx.fill();
 

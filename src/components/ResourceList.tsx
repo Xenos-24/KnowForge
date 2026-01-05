@@ -3,17 +3,45 @@ import { ResourceCard } from "./ResourceCard";
 import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function ResourceList({ activeFolderId, activeType, onEdit, onDelete }: {
+export function ResourceList({ activeFolderId, activeType, onEdit, onDelete, folders, onToggleImportant, resources: appResources }: {
     activeFolderId: string | null;
     activeType?: string;
     onEdit?: (res: any) => void;
     onDelete?: (id: string) => void;
+    folders?: any[];
+    onToggleImportant?: (id: string, isImportant: boolean) => void;
+    resources?: any[]; // Resources from App to trigger refresh
 }) {
     const [resources, setResources] = useState<any[]>([]);
 
     useEffect(() => {
         fetchResources();
-    }, [activeFolderId, activeType]);
+    }, [activeFolderId, activeType, appResources?.length]); // Add appResources.length to trigger refresh
+
+    // Wrapper to refresh after toggling important
+    const handleToggleImportant = async (id: string, isImportant: boolean) => {
+        if (onToggleImportant) {
+            await onToggleImportant(id, isImportant);
+            fetchResources();
+        }
+    };
+
+    // Wrapper to refresh after editing
+    const handleEdit = (resource: any) => {
+        if (onEdit) {
+            onEdit(resource);
+            // Refresh after a short delay to allow modal to update
+            setTimeout(() => fetchResources(), 500);
+        }
+    };
+
+    // Wrapper to refresh after deleting
+    const handleDelete = async (id: string) => {
+        if (onDelete) {
+            await onDelete(id);
+            fetchResources(); // Refresh immediately after delete
+        }
+    };
 
     async function fetchResources() {
         let query = supabase.from('resources').select('*');
@@ -34,14 +62,36 @@ export function ResourceList({ activeFolderId, activeType, onEdit, onDelete }: {
             }
         }
 
+        // 3. Consistent ordering to prevent jumping
+        query = query.order('created_at', { ascending: false });
+
         const { data, error } = await query;
         if (!error && data) setResources(data);
     }
 
+    // Get display heading based on selection
+    const getHeading = () => {
+        if (activeFolderId && folders) {
+            const folder = folders.find((f: any) => f.id === activeFolderId);
+            return folder ? folder.name : 'Library';
+        }
+
+        if (activeType && activeType !== 'all') {
+            const typeNames: Record<string, string> = {
+                'video': 'Videos',
+                'link': 'Links',
+                'doc': 'Documents'
+            };
+            return typeNames[activeType] || 'Library';
+        }
+
+        return 'Library';
+    };
+
     return (
         <div className="w-full p-8 pb-32">
             <div className="mb-8">
-                <h2 className="text-3xl font-bold text-white">Library</h2>
+                <h2 className="text-3xl font-bold text-primary">{getHeading()}</h2>
                 <p className="text-slate-500 mt-1">{resources.length} resources found</p>
             </div>
 
@@ -62,8 +112,10 @@ export function ResourceList({ activeFolderId, activeType, onEdit, onDelete }: {
                         >
                             <ResourceCard
                                 resource={res}
-                                onEdit={onEdit}
-                                onDelete={onDelete}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onToggleImportant={handleToggleImportant}
+                                folders={folders}
                             />
                         </motion.div>
                     ))}

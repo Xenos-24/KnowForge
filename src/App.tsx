@@ -26,8 +26,8 @@ export default function App() {
                     onOpenModal={() => setIsModalOpen(true)}
                     folders={folders}
                     onDeleteFolder={deleteFolder}
-                    onCreateFolder={async (name: string) => {
-                        if (name) await createFolder(name, '#64748B');
+                    onCreateFolder={async (name: string, color: string) => {
+                        if (name) await createFolder(name, color);
                     }}
                     resources={resources}
                 />
@@ -63,8 +63,19 @@ export default function App() {
                         <ResourceList
                             activeFolderId={activeFolderId}
                             activeType={activeType}
+                            folders={folders}
+                            resources={resources}
                             onEdit={(res) => { setEditingResource(res); setIsModalOpen(true); }}
                             onDelete={(id) => { if (confirm("Delete this resource?")) deleteResource(id); }}
+                            onToggleImportant={async (id, isImportant) => {
+                                console.log('Toggle important called:', id, isImportant);
+                                try {
+                                    await updateResource(id, { is_important: isImportant });
+                                    console.log('Update successful');
+                                } catch (error) {
+                                    console.error('Update failed:', error);
+                                }
+                            }}
                         />
                     ) : (
                         <div className="w-full h-full min-h-[500px]">
