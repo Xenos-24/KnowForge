@@ -54,7 +54,7 @@ export function FilterSidebar({
     };
 
     return (
-        <aside className="w-64 flex-shrink-0 h-screen bg-[#0C0C12] border-r border-white/5 flex flex-col pt-6 pb-4">
+        <aside className="w-64 flex-shrink-0 h-screen bg-surface-0 border-r border-subtle flex flex-col pt-6 pb-4">
 
             {/* 1. Primary Actions & Library */}
             <div className="px-4 mb-6 space-y-4">
@@ -84,12 +84,12 @@ export function FilterSidebar({
                         {activeFolderId === null && activeType === 'all' && (
                             <motion.div
                                 layoutId="activeItem"
-                                className="absolute inset-0 bg-[#1E1E2E] shadow-lg rounded-xl"
+                                className="absolute inset-0 bg-surface-1 shadow-lg rounded-xl"
                                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                             />
                         )}
                         <span className="relative z-10 flex items-center gap-3">
-                            <LayoutGrid size={20} className={activeFolderId === null && activeType === 'all' ? "text-purple-500" : ""} />
+                            <LayoutGrid size={20} className={activeFolderId === null && activeType === 'all' ? "text-accent" : ""} />
                             <span className="font-bold text-sm tracking-wide">Library</span>
                         </span>
                     </button>
@@ -97,6 +97,7 @@ export function FilterSidebar({
 
                 {/* Resource Filters (Type Selection) */}
                 <div className="space-y-1">
+                    <h3 className="text-xs font-bold text-tertiary uppercase tracking-widest px-3 mb-2">Categories</h3>
                     {navItems.map((item) => {
                         const isActive = activeType === item.id;
                         return (
@@ -108,13 +109,13 @@ export function FilterSidebar({
                                 }}
                                 className={`
                                     relative w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm transition-colors active:scale-95
-                                    ${isActive ? "text-purple-400" : "text-gray-400 hover:text-white hover:bg-white/5"}
+                                    ${isActive ? "text-accent" : "text-secondary hover:text-primary hover:bg-surface-1"}
                                 `}
                             >
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeItem"
-                                        className="absolute inset-0 bg-white/10 border-l-2 border-purple-500 rounded-lg"
+                                        className="absolute inset-0 bg-surface-2/50 border-l-2 border-accent rounded-lg"
                                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                     />
                                 )}
@@ -135,7 +136,7 @@ export function FilterSidebar({
             <div className="flex-1 overflow-y-auto px-4">
                 {/* Header with (+) Button */}
                 <div className="flex items-center justify-between px-2 mb-3 group">
-                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <h3 className="text-xs font-bold text-tertiary uppercase tracking-widest">
                         Folders
                     </h3>
                     <button
@@ -155,7 +156,7 @@ export function FilterSidebar({
                                 autoFocus
                                 type="text"
                                 placeholder="Folder Name..."
-                                className="w-full bg-[#0C0C12] text-white text-sm border border-white/10 rounded px-2 py-1 outline-none focus:border-purple-500 transition-colors"
+                                className="w-full bg-surface-0 text-primary text-sm border border-moderate rounded px-2 py-1 outline-none focus:border-accent transition-colors"
                                 onBlur={() => setIsCreatingFolder(false)}
                                 onKeyDown={handleCreateFolderKeyUp}
                             />
@@ -173,13 +174,13 @@ export function FilterSidebar({
                                     }}
                                     className={`
                                         relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all active:scale-95
-                                        ${isActive ? "text-white pl-[14px]" : "text-gray-400 hover:text-gray-200 hover:bg-white/5"}
+                                        ${isActive ? "text-primary pl-[14px]" : "text-secondary hover:text-primary hover:bg-surface-1"}
                                     `}
                                 >
                                     {isActive && (
                                         <motion.div
                                             layoutId="activeItem"
-                                            className="absolute inset-0 bg-white/10 border-l-2 border-purple-500 rounded-lg"
+                                            className="absolute inset-0 bg-surface-2/50 backdrop-blur-sm border-l-2 border-accent rounded-lg shadow-[inset_0_1px_0_0_rgba(160,137,104,0.1)]"
                                             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                         />
                                     )}
@@ -187,7 +188,7 @@ export function FilterSidebar({
                                         size={14}
                                         className={`
                                             relative z-10 transition-colors 
-                                            ${isActive ? "text-purple-500" : "text-gray-600 group-hover:text-gray-400"}
+                                            ${isActive ? "text-accent" : "text-tertiary group-hover:text-secondary"}
                                         `}
                                     />
                                     <span className="relative z-10 truncate">{folder.name}</span>

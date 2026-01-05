@@ -15,9 +15,9 @@ export default function App() {
     const [editingResource, setEditingResource] = useState<any | null>(null);
 
     return (
-        <div className="flex h-screen w-screen bg-[#111118] overflow-hidden text-white font-sans">
+        <div className="flex h-screen w-screen bg-app-bg overflow-hidden text-primary font-sans">
             {/* 1. Sidebar */}
-            <div className="w-64 h-full flex-shrink-0 border-r border-white/5 bg-[#0C0C12]">
+            <div className="w-64 h-full flex-shrink-0 border-r border-subtle bg-surface-0">
                 <FilterSidebar
                     activeFolderId={activeFolderId}
                     setActiveFolderId={setActiveFolderId}
@@ -35,22 +35,22 @@ export default function App() {
 
             {/* 2. Main Content */}
             <div className="flex-1 h-full relative flex flex-col min-w-0">
-                {/* Header: Strict Text Branding (No Logo, No Subtitle) */}
-                <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-[#0F0F14]/80 backdrop-blur-md flex-shrink-0 sticky top-0 z-20">
+                {/* Header: Glass Effect with Gradient Logo */}
+                <header className="h-16 border-b border-subtle flex items-center justify-between px-8 bg-surface-0/80 backdrop-blur-md flex-shrink-0 sticky top-0 z-20 shadow-[0_1px_0_0_rgba(139,92,246,0.1)]">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-white leading-none">KnowForge</h1>
+                        <h1 className="text-2xl font-bold tracking-tight leading-none text-[#8b7355]">KnowForge</h1>
                     </div>
 
                     <div className="flex gap-3">
                         <button
                             onClick={() => setView(view === 'list' ? 'graph' : 'list')}
-                            className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 border border-white/10 rounded-md hover:bg-white/5 transition-colors"
+                            className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-secondary bg-surface-1 border border-moderate rounded-xl hover:bg-surface-2 hover:text-primary hover:border-purple-500/30 transition-all duration-200"
                         >
                             {view === 'list' ? 'View Graph' : 'View Library'}
                         </button>
                         <button
                             onClick={() => { setEditingResource(null); setIsModalOpen(true); }}
-                            className="px-5 py-2 text-xs font-bold uppercase tracking-wider text-white bg-[#8B5CF6] rounded-md shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:bg-[#7c3aed] transition-all"
+                            className="px-6 py-2.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-200"
                         >
                             + Resource
                         </button>
@@ -58,7 +58,7 @@ export default function App() {
                 </header>
 
                 {/* Main View Area */}
-                <main className="flex-1 overflow-y-auto w-full p-0 bg-[#111118]">
+                <main className="flex-1 overflow-y-auto w-full p-0 bg-app-bg">
                     {view === 'list' ? (
                         <ResourceList
                             activeFolderId={activeFolderId}

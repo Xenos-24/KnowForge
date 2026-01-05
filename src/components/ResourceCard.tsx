@@ -31,10 +31,10 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
         // 1. EXCEL / SHEETS
         if (title.endsWith('.xlsx') || title.endsWith('.xls') || title.endsWith('.csv') || type === 'sheet') {
             return {
-                headerBg: "bg-[#BEF264]", // Neon Lime (Solid)
-                iconColor: "text-black", // Contrast for light lime
-                markerColor: "bg-[#BEF264]",
-                icon: <FileSpreadsheet className="text-black/80 w-12 h-12" />,
+                headerBg: "bg-[#f5f1e8]", // Soft Cream
+                iconColor: "text-[#8b7355]",
+                markerColor: "bg-[#8b7355]",
+                icon: <FileSpreadsheet className="text-[#8b7355] w-12 h-12" />,
                 badge: "SHEET"
             };
         }
@@ -42,10 +42,10 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
         // 2. WORD / DOCS
         if (title.endsWith('.docx') || title.endsWith('.doc') || type === 'doc') {
             return {
-                headerBg: "bg-[#3B82F6]", // Bright Blue (Solid)
-                iconColor: "text-white",
-                markerColor: "bg-[#3B82F6]",
-                icon: <FileText className="text-white w-12 h-12" />,
+                headerBg: "bg-[#f0ebe3]", // Light Sand
+                iconColor: "text-[#a08968]",
+                markerColor: "bg-[#a08968]",
+                icon: <FileText className="text-[#a08968] w-12 h-12" />,
                 badge: "DOC"
             };
         }
@@ -53,10 +53,10 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
         // 3. PDF
         if (title.endsWith('.pdf') || type === 'pdf') {
             return {
-                headerBg: "bg-[#EF4444]", // Vibrant Red (Solid)
-                iconColor: "text-white",
-                markerColor: "bg-[#EF4444]",
-                icon: <File className="text-white w-12 h-12" />,
+                headerBg: "bg-[#ede8e0]", // Warm Beige
+                iconColor: "text-[#9b8b7e]",
+                markerColor: "bg-[#9b8b7e]",
+                icon: <File className="text-[#9b8b7e] w-12 h-12" />,
                 badge: "PDF"
             };
         }
@@ -64,20 +64,20 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
         // 4. Video
         if (type === 'video') {
             return {
-                headerBg: 'bg-[#A855F7]', // Lavender/Purple (Solid)
-                iconColor: 'text-white',
-                markerColor: 'bg-[#A855F7]',
-                icon: <Play className="text-white w-12 h-12" />,
+                headerBg: 'bg-[#e8dfd5]', // Warm Taupe
+                iconColor: 'text-[#8b7355]',
+                markerColor: 'bg-[#8b7355]',
+                icon: <Play className="text-[#8b7355] w-12 h-12" />,
                 badge: 'VIDEO'
             };
         }
 
         // 5. Default / Link
         return {
-            headerBg: 'bg-[#64748B]', // Slate (Solid)
-            iconColor: 'text-white',
-            markerColor: 'bg-[#64748B]',
-            icon: <LinkIcon className="text-white w-12 h-12" />,
+            headerBg: 'bg-[#e9e4dc]', // Neutral Cream
+            iconColor: 'text-[#9b8b7e]',
+            markerColor: 'bg-[#9b8b7e]',
+            icon: <LinkIcon className="text-[#9b8b7e] w-12 h-12" />,
             badge: 'LINK'
         };
     };
@@ -94,7 +94,7 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
             // Keep DnD interaction but remove "Juice"
             className="h-full touch-none group relative pointer-events-auto"
         >
-            <div className="flex flex-col h-full bg-[#15151A] rounded-xl overflow-hidden shadow-lg hover:bg-[#1E1E24] hover:border-purple-500/40 hover:shadow-purple-900/20 transition-all duration-200 border border-white/5">
+            <div className="flex flex-col h-full bg-surface-1 rounded-2xl overflow-hidden shadow-lg hover:bg-surface-2 hover:border-purple-500/20 hover:shadow-[0_8px_32px_-8px_rgba(139,92,246,0.15)] hover:-translate-y-1 transition-all duration-300 border border-subtle">
 
                 {/* Visual Header (Solid Color) */}
                 <div className={cn("relative h-40 w-full shrink-0 flex items-center justify-center overflow-hidden", config.headerBg)}>
@@ -126,28 +126,56 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
                 </div>
 
                 {/* Content Body */}
-                <div className="p-5 flex flex-col flex-1 relative">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] font-bold text-[rgba(237,237,237,0.4)] uppercase tracking-widest">{resource.folder}</span>
-                        <span className="text-[10px] font-medium text-[rgba(237,237,237,0.4)]">{date}</span>
+                <div className="p-6 flex flex-col flex-1 relative border-t border-subtle">
+                    {/* Pills: Folder, Type, Important */}
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                        {/* Folder Pill */}
+                        {resource.folder && (
+                            <span className="pill-folder px-2 py-0.5 rounded-full text-xs font-medium">
+                                {resource.folder}
+                            </span>
+                        )}
+
+                        {/* Type Pill */}
+                        {resource.type && (
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${resource.type === 'video' ? 'pill-video' :
+                                resource.type === 'pdf' || resource.type === 'doc' ? 'pill-doc' :
+                                    'pill-link'
+                                }`}>
+                                {resource.type === 'video' ? '📹 Video' :
+                                    resource.type === 'pdf' ? '📄 PDF' :
+                                        resource.type === 'doc' ? '📝 Doc' :
+                                            '🔗 Link'}
+                            </span>
+                        )}
+
+                        {/* Important Star */}
+                        {resource.is_important && (
+                            <span className="pill-important px-2 py-0.5 rounded-full text-xs font-medium">
+                                ⭐ Important
+                            </span>
+                        )}
+
+                        <span className="text-xs font-medium text-tertiary ml-auto">{date}</span>
                     </div>
 
-                    <h3 className="text-base font-bold text-[#EDEDED] leading-snug mb-2 line-clamp-2 group-hover:text-white transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); onEdit?.(resource); }}>
+                    <h3 className="text-xl font-semibold text-primary leading-tight mb-3 line-clamp-2 cursor-pointer" onClick={(e) => { e.stopPropagation(); onEdit?.(resource); }}>
                         {resource.title}
                     </h3>
 
-                    <p className="text-xs text-[rgba(237,237,237,0.6)] line-clamp-3 mb-4 leading-relaxed font-normal">
+                    <p className="text-sm text-secondary line-clamp-3 mb-4 leading-relaxed">
                         {resource.description}
                     </p>
 
-                    <div className="mt-auto pt-4 border-t border-[#ffffff0f] flex items-center justify-between">
-                        <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()}>
+                    <div className="mt-auto pt-4 border-t border-subtle flex items-center justify-between">
+                        <div className="flex gap-1" onMouseDown={(e) => e.stopPropagation()}>
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onEdit?.(resource);
                                 }}
-                                className="text-[rgba(237,237,237,0.4)] hover:text-white transition-colors p-1 hover:bg-white/5 rounded"
+                                className="p-2 rounded-lg text-tertiary hover:bg-accent/10 hover:text-accent transition-colors"
+                                title="Edit"
                             >
                                 <Edit size={14} />
                             </button>
@@ -156,13 +184,14 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
                                     e.stopPropagation();
                                     onDelete?.(resource.id);
                                 }}
-                                className="text-[rgba(237,237,237,0.4)] hover:text-red-400 transition-colors p-1 hover:bg-white/5 rounded"
+                                className="p-2 rounded-lg text-tertiary hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                                title="Delete"
                             >
                                 <Trash2 size={14} />
                             </button>
                         </div>
-                        <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[rgba(237,237,237,0.6)] hover:text-white flex items-center gap-1 transition-colors" onMouseDown={(e) => e.stopPropagation()}>
-                            OPEN <ExternalLink size={12} />
+                        <a href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors" onMouseDown={(e) => e.stopPropagation()}>
+                            Open <ExternalLink size={14} />
                         </a>
                     </div>
                 </div>
