@@ -91,12 +91,10 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
             style={style}
             {...listeners}
             {...attributes}
-            // "Juice" Interaction
-            whileHover={{ y: -8, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="h-full touch-none group relative"
+            // Keep DnD interaction but remove "Juice"
+            className="h-full touch-none group relative pointer-events-auto"
         >
-            <div className="flex flex-col h-full bg-[#1E1E2E] rounded-xl overflow-hidden shadow-lg hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.5)] transition-shadow duration-300 border border-[#ffffff0f]">
+            <div className="flex flex-col h-full bg-[#15151A] rounded-xl overflow-hidden shadow-lg hover:bg-[#1E1E24] hover:border-purple-500/40 hover:shadow-purple-900/20 transition-all duration-200 border border-white/5">
 
                 {/* Visual Header (Solid Color) */}
                 <div className={cn("relative h-40 w-full shrink-0 flex items-center justify-center overflow-hidden", config.headerBg)}>
@@ -134,7 +132,7 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
                         <span className="text-[10px] font-medium text-[rgba(237,237,237,0.4)]">{date}</span>
                     </div>
 
-                    <h3 className="text-base font-bold text-[#EDEDED] leading-snug mb-2 line-clamp-2 group-hover:text-white transition-colors cursor-pointer" onClick={() => onEdit(resource)}>
+                    <h3 className="text-base font-bold text-[#EDEDED] leading-snug mb-2 line-clamp-2 group-hover:text-white transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); onEdit?.(resource); }}>
                         {resource.title}
                     </h3>
 
@@ -144,10 +142,22 @@ export const ResourceCard = ({ resource, onEdit, onDelete }: ResourceCardProps) 
 
                     <div className="mt-auto pt-4 border-t border-[#ffffff0f] flex items-center justify-between">
                         <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()}>
-                            <button onClick={() => onEdit(resource)} className="text-[rgba(237,237,237,0.4)] hover:text-white transition-colors p-1 hover:bg-white/5 rounded">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit?.(resource);
+                                }}
+                                className="text-[rgba(237,237,237,0.4)] hover:text-white transition-colors p-1 hover:bg-white/5 rounded"
+                            >
                                 <Edit size={14} />
                             </button>
-                            <button onClick={() => onDelete(resource.id)} className="text-[rgba(237,237,237,0.4)] hover:text-red-400 transition-colors p-1 hover:bg-white/5 rounded">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete?.(resource.id);
+                                }}
+                                className="text-[rgba(237,237,237,0.4)] hover:text-red-400 transition-colors p-1 hover:bg-white/5 rounded"
+                            >
                                 <Trash2 size={14} />
                             </button>
                         </div>
